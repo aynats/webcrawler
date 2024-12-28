@@ -1,9 +1,5 @@
 import aiohttp
-import os
 import re
-import requests
-
-from urllib.request import urlopen
 from urllib.parse import urljoin
 from bs4 import BeautifulSoup
 
@@ -42,3 +38,14 @@ class Parser:
             if path and path.startswith('mail'):    # пропуск "mailto:" и т.п.
                 continue
             yield path
+
+    @staticmethod
+    def get_urls_from_txt(file: str):
+        """
+        Получает список ссылок из файла .txt
+        :param file: Файл .txt со URL
+        :return: Список ссылок из файла .txt
+        """
+        with open(file) as f:
+            urls = re.split(r'\n', f.read())
+        return urls
