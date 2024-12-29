@@ -17,13 +17,16 @@ logging.basicConfig(
 @click.option('--path', '-p', default='', help='Директория для скачивания файлов'
                                                'Пример: --path C:/Users/User/directory')
 @click.option('--bots', '-b', default=4, help="Количество ботов для обхода", show_default=True)
-async def crawl(scan: str, depth: int, path: str, bots: int):
+@click.option('--domain', '-dm', default='', type=str, help="Переход только по ссылкам указанного домена"
+                                                            'Пример: --domain example.org или --domain domains.txt')
+async def crawl(scan: str, depth: int, path: str, bots: int, domain: str):
     async def run_crawler():
         crawler = Crawler(
             scan,
             depth=depth,
             directory=path,
             bots=bots,
+            domain=domain
         )
         try:
             await crawler.run()
