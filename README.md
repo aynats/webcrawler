@@ -22,6 +22,8 @@
   -p, --path TEXT      Директория для скачивания файловПример: --path
                        C:/Users/User/directory
   -b, --bots INTEGER   Количество ботов для обхода  [default: 4]
+  -dm, --domain TEXT   Переход только по ссылкам указанного доменаПример:
+                       --domain example.org или --domain domains.txt
   --help               Show this message and exit.
 ```
 
