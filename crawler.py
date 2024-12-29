@@ -2,7 +2,8 @@ import asyncio
 import logging
 from task import FetchTask
 from typing import Optional
-from URL_parser import Parser
+from URL_parser import URLParser
+from domains_parser import DomainParser
 
 logging.basicConfig(
     format='%(asctime)s %(bot_id)s%(message)s%(url)s',
@@ -11,12 +12,12 @@ logging.basicConfig(
 )
 
 class Crawler:
-    def __init__(self, file, depth: int = 2, directory: str = '', bots: int = 4):
+    def __init__(self, file, depth: int = 2, directory: str = '', bots: int = 4, domain: str = ''):
         if file.endswith('.txt') or file.startswith("http"):
             self.file = file
         else:
             raise ValueError("Введите название файла формата .txt или ссылку на ресурс")
-        self.urls_to_visit = Parser.get_urls_from_txt(self.file) if self.file.endswith('txt') else [self.file]
+        self.urls_to_visit = URLParser.get_urls_from_txt(self.file) if self.file.endswith('txt') else [self.file]
         self.visited_urls = []
         self.max_rate = 3
         self.interval = 5
@@ -28,6 +29,7 @@ class Crawler:
         self.bots = bots
         self.depth = depth
         self.directory = directory
+        self.domain = DomainParser.get_domains_from_txt(domain) if domain and domain.endswith(".txt") else [domain]
 
     async def _worker(self, task, tid):
         async with asyncio.Semaphore(self.max_rate):
@@ -57,12 +59,14 @@ class Crawler:
             self.urls_to_visit.append(url)
 
     async def crawl(self, url):
-        html = await Parser.get_webpage_html(url)
-        for current_url in Parser.take_linked_urls(url, html):
-            if (current_url and current_url.find('captcha') == -1
-                    and not current_url.endswith("rst")
-                    and not current_url.startswith("../")):
-                self.add_url_to_visit(current_url)
+        html = await URLParser.get_webpage_html(url)
+        if html is not None:
+            for current_url in URLParser.take_linked_urls(url, html):
+                if self.domain == [''] or DomainParser.is_allowed_domain(current_url, self.domain):
+                    if (current_url and current_url.find('captcha') == -1
+                            and not current_url.endswith("rst")
+                            and not current_url.startswith("../")):
+                        self.add_url_to_visit(current_url)
 
     async def run(self):
         for i in range(1, self.bots):
