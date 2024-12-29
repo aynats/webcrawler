@@ -33,20 +33,11 @@ class Parser:
         soup = BeautifulSoup(html, 'html.parser')
         for link in soup.find_all('a'):     # гиперссылка: HTML-тег <a>
             path = link.get('href')     # непосредственно ссылка
-            if path and path.startswith('/'):
-                path = urljoin(url, path)
-            if path and '#' in path:
-                continue
-
-            if path and not path.startswith('http://') and not path.startswith('https://'):
-                path = urljoin(url, path)
-
-            if not path or not (path.startswith('http://') or path.startswith('https://')):
-                continue
-
-            if path and path.startswith('mail'):    # пропуск "mailto:" и т.п.
-                continue
-            yield path
+            if path and not path.startswith('mail') and '#' not in path:
+                if not (path.startswith('http://') or path.startswith('https://')):
+                    path = urljoin(url, path)
+                if path.startswith('http://') or path.startswith('https://'):
+                    yield path
 
     @staticmethod
     def get_urls_from_txt(file: str):
