@@ -4,7 +4,7 @@ from urllib.parse import urljoin
 from bs4 import BeautifulSoup
 
 
-class Parser:
+class URLParser:
     @staticmethod
     async def get_webpage_html(url: str):
         """
