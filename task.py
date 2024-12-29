@@ -4,11 +4,11 @@ from robot_parser import RobotParser
 import logging
 import re
 
-
 logging.basicConfig(
-    format='%(asctime)s %(levelname)s:%(message)s',
-    level=logging.INFO)
-
+    format='%(asctime)s %(bot_id)s%(message)s%(url)s',
+    datefmt='%Y-%m-%d %H:%M:%S',
+    level=logging.INFO
+)
 
 @dataclass
 class FetchTask:
@@ -24,7 +24,6 @@ class FetchTask:
         """
         depth = 0
         while crawler.urls_to_visit and depth <= self.maximum_depth:
-
             url = crawler.urls_to_visit.pop(0)
             parser = RobotParser(url)
             parser.parse()
@@ -37,8 +36,7 @@ class FetchTask:
                 last_folder = last_folder.group(0)
             if last_folder in hot_keys["Disallow"] or "/" in hot_keys["Disallow"]:
                 return
-
-            logging.info(f' {worker_id} Crawling now: {url}')
+            logging.info("Веб-краулер обрабатывает", extra={'bot_id': f'[Bot {worker_id}] ', 'url': f': {url}'})
             new_path = self.path + url  # if self.path.endswith('/') else self.path + '/' + url
             name_directory = re.sub(r'\W+', '_', new_path)    # Из ссылки заменяю все, кроме букв, на _
             path, directory = Saver.select_directory(name_directory)

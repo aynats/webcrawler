@@ -4,8 +4,10 @@ import logging
 from crawler import Crawler
 
 logging.basicConfig(
-    format='%(asctime)s %(levelname)s: %(message)s',
-    level=logging.INFO)
+    format='%(asctime)s %(bot_id)s%(message)s%(url)s',
+    datefmt='%Y-%m-%d %H:%M:%S',
+    level=logging.INFO
+)
 
 
 @click.command()
@@ -26,7 +28,7 @@ async def crawl(scan: str, depth: int, path: str, bots: int):
         try:
             await crawler.run()
             await asyncio.sleep(.25)
-            logging.info("Загрузка содержимого страниц закончена")
+            logging.info("Загрузка содержимого страниц закончена.", extra={'bot_id': '', 'url': ''})
         except Exception as e:
             print(f"Произошла ошибка: {e}")
             await crawler.stop()

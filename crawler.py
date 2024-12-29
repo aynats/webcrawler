@@ -5,9 +5,10 @@ from typing import Optional
 from url_parser import Parser
 
 logging.basicConfig(
-    format='%(asctime)s %(levelname)s:%(message)s',
-    level=logging.INFO)
-
+    format='%(asctime)s %(bot_id)s%(message)s%(url)s',
+    datefmt='%Y-%m-%d %H:%M:%S',
+    level=logging.INFO
+)
 
 class Crawler:
     def __init__(self, file, depth: int = 2, directory: str = '', bots: int = 4):
