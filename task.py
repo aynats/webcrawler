@@ -1,6 +1,6 @@
 from dataclasses import dataclass
-from .utils import Utils
-from .robot_parser import RobotParser
+from saver import Saver
+from robot_parser import RobotParser
 import logging
 import re
 
@@ -15,15 +15,12 @@ class FetchTask:
     maximum_depth: int
     tid: int
     path: str
-    maxsize: int
 
-    async def perform(self, crawler, worker_id, rtypes, ntypes, nurls):
+    async def perform(self, crawler, worker_id: int):
         """
-        param: crawler: Краулер
-        param: worker_id: Какой бот сейчас обрабатывает запрос
-        param: rtypes: Типы файлов, которые хочется скачивать
-        param: ntypes: Типы файлов, которые не хочется скачивать
-        param: nurls: Ссылки, с которых не хочется ничег скачивать
+        Обходит адреса в пределах глубины сканирования
+        param: crawler: Crawler
+        param: worker_id: Порядковый номер бота, обрабатывающего запрос
         """
         depth = 0
         while crawler.urls_to_visit and depth <= self.maximum_depth:
@@ -42,8 +39,10 @@ class FetchTask:
                 return
 
             logging.info(f' {worker_id} Crawling now: {url}')
-            name_folder = self.path + url if self.path.endswith('/') else self.path + '/' + url
-            Utils.save_page(url, self.maxsize, rtypes, ntypes, nurls, re.sub(r'\W+', '_', name_folder))
+            new_path = self.path + url  # if self.path.endswith('/') else self.path + '/' + url
+            name_directory = re.sub(r'\W+', '_', new_path)    # Из ссылки заменяю все, кроме букв, на _
+            path, directory = Saver.select_directory(name_directory)
+            Saver.save_webpage(url, path, directory)
 
             try:
                 await crawler.crawl(url)

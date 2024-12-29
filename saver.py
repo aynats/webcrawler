@@ -42,7 +42,8 @@ class Saver:
         os.chdir('../')
 
     @staticmethod
-    def save_media(soup, directory, session, url, tag, attribute):
+    def save_media(soup: BeautifulSoup, directory: str, session: requests.sessions.Session,
+                   url: str, tag: str, attribute: str):
         """
         Сохраняет контент страницы
         :param: soup: BeautifulSoup
@@ -53,8 +54,8 @@ class Saver:
         """
         for resource in soup.findAll(tag):
             if resource.has_attr(attribute):
-                filename, extension = os.path.splitext(os.path.basename(resource[attribute]))     # Разделили название файла и расширение
-
+                # Разделили название файла и расширение
+                filename, extension = os.path.splitext(os.path.basename(resource[attribute]))
                 filename = re.sub(r'\W+', '', filename) + extension    # Взяли только буквенные символы в названии
                 file_url = urljoin(url, resource.get(attribute))    # Оффлайн-доступ к медиафайлам. Заменяем ссылки
                 filepath = os.path.join(directory, filename)

@@ -2,7 +2,7 @@ import asyncio
 import logging
 from task import FetchTask
 from typing import Optional
-from utils import Utils
+from url_parser import Parser
 
 logging.basicConfig(
     format='%(asctime)s %(levelname)s:%(message)s',
@@ -10,13 +10,12 @@ logging.basicConfig(
 
 
 class Crawler:
-    def __init__(self, file, depth: int, rtypes: str, ntypes: str, nurls: str,
-                 path_to_save: str, maxsize: int, bots: int = 4):
+    def __init__(self, file, depth: int = 2, directory: str = '', bots: int = 4):
         if file.endswith('.txt') or file.startswith("http"):
             self.file = file
         else:
-            raise ValueError("File must be at format .txt or begins with http")
-        self.urls_to_visit = Utils.get_urls_from_file(self.file) if self.file.endswith('txt') else [self.file]
+            raise ValueError("Введите название файла формата .txt или ссылку на ресурс")
+        self.urls_to_visit = Parser.get_urls_from_txt(self.file) if self.file.endswith('txt') else [self.file]
         self.visited_urls = []
         self.max_rate = 3
         self.interval = 5
@@ -27,16 +26,12 @@ class Crawler:
         self.stop_event = asyncio.Event()
         self.bots = bots
         self.depth = depth
-        self.maxsize = maxsize
-        self.path_to_save = path_to_save
-        self.rtypes = rtypes.replace(',', '').split()
-        self.ntypes = ntypes.replace(',', '').split()
-        self.nurls = nurls.replace(',', '').split()
+        self.directory = directory
 
     async def _worker(self, task, tid):
         async with asyncio.Semaphore(self.max_rate):
             self.concurrent_workers += 1
-            await task.perform(self, tid, self.rtypes, self.ntypes, self.nurls)
+            await task.perform(self, tid)
             self.tasks_queue.task_done()
         self.concurrent_workers -= 1
         if not self.is_crawled and self.concurrent_workers == 0:
@@ -61,8 +56,8 @@ class Crawler:
             self.urls_to_visit.append(url)
 
     async def crawl(self, url):
-        html = await Utils.download_url(url)
-        for current_url in Utils.get_linked_urls(url, html):
+        html = await Parser.get_webpage_html(url)
+        for current_url in Parser.take_linked_urls(url, html):
             if (current_url and current_url.find('captcha') == -1
                     and not current_url.endswith("rst")
                     and not current_url.startswith("../")):
@@ -72,8 +67,7 @@ class Crawler:
         for i in range(1, self.bots):
             await self.tasks_queue.put(FetchTask(tid=i,
                                                  maximum_depth=self.depth,
-                                                 path=self.path_to_save,
-                                                 maxsize=self.maxsize))
+                                                 path=self.directory))
         self.is_crawled = True
         self._scheduler_task = asyncio.create_task(self._scheduler())
         await self.tasks_queue.join()
