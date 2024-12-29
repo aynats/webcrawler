@@ -10,6 +10,7 @@ logging.basicConfig(
     level=logging.INFO
 )
 
+
 @dataclass
 class FetchTask:
     maximum_depth: int
@@ -36,6 +37,7 @@ class FetchTask:
                 last_folder = last_folder.group(0)
             if last_folder in hot_keys["Disallow"] or "/" in hot_keys["Disallow"]:
                 return
+
             logging.info("Веб-краулер обрабатывает", extra={'bot_id': f'[Bot {worker_id}] ', 'url': f': {url}'})
             new_path = self.path + url  # if self.path.endswith('/') else self.path + '/' + url
             name_directory = re.sub(r'\W+', '_', new_path)    # Из ссылки заменяю все, кроме букв, на _
@@ -46,7 +48,7 @@ class FetchTask:
                 await crawler.crawl(url)
             except Exception as e:
                 print(e)
-                logging.exception(f'Failed to crawl: {url}')
+                logging.exception(f'Ошибка обработки: {url}')
             finally:
                 crawler.visited_urls.append(url)
                 depth += 1

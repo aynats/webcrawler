@@ -2,7 +2,7 @@ import asyncio
 import logging
 from task import FetchTask
 from typing import Optional
-from url_parser import Parser
+from URL_parser import Parser
 
 logging.basicConfig(
     format='%(asctime)s %(bot_id)s%(message)s%(url)s',
