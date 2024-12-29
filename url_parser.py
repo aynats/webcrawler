@@ -35,6 +35,15 @@ class Parser:
             path = link.get('href')     # непосредственно ссылка
             if path and path.startswith('/'):
                 path = urljoin(url, path)
+            if path and '#' in path:
+                continue
+
+            if path and not path.startswith('http://') and not path.startswith('https://'):
+                path = urljoin(url, path)
+
+            if not path or not (path.startswith('http://') or path.startswith('https://')):
+                continue
+
             if path and path.startswith('mail'):    # пропуск "mailto:" и т.п.
                 continue
             yield path
