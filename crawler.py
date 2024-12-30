@@ -32,10 +32,10 @@ class Crawler:
         self.directory = directory
         self.domain = DomainParser.get_domains_from_txt(domain) if domain and domain.endswith(".txt") else [domain]
 
-    async def _worker(self, task, tid):
+    async def _worker(self, bot_process, tid):
         async with asyncio.Semaphore(self.max_rate):
             self.concurrent_workers += 1
-            await task.process(self, tid)
+            await bot_process.process(self, tid)
             self.tasks_queue.task_done()
         self.concurrent_workers -= 1
         if not self.is_crawled and self.concurrent_workers == 0:

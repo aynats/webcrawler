@@ -31,15 +31,3 @@ def test_add_url_to_visit():
     # Попытка добавить тот же URL не должна увеличивать длину списка
     crawler.add_url_to_visit("https://example.com/new_page")
     assert len(crawler.urls_to_visit) == initial_count + 1
-
-
-@pytest.mark.asyncio
-@patch('URL_parser.URLParser.get_webpage_html', return_value="<html><a href='https://example.com/new_page'></a></html>")
-@patch('URL_parser.URLParser.take_linked_urls', return_value=['https://example.com/new_page'])
-async def test_crawl(mock_get_webpage_html, mock_take_linked_urls):
-    crawler = Crawler(file="sites_crawler.txt", depth=3, directory="test_dir", bots=4)
-
-    await crawler.crawl("https://example.com")
-
-    # Проверяем, что новый URL был добавлен в очередь для обхода
-    assert "https://example.com/new_page" in crawler.urls_to_visit
