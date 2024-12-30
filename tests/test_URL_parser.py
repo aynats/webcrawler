@@ -1,4 +1,5 @@
 import pytest
+from unittest.mock import MagicMock
 from URL_parser import URLParser
 
 
@@ -58,3 +59,17 @@ def test_get_urls_from_txt_empty_file(tmp_path):
 
     urls = URLParser.get_urls_from_txt(str(file))
     assert urls == [''], "Для пустого файла должен возвращаться пустой список"
+
+
+@pytest.mark.asyncio
+async def test_get_webpage_html_exception_handling():
+    """Тест обработки общего исключения."""
+    url = "https://example.com"
+    with pytest.raises(Exception):
+        async def mock_get():
+            raise Exception("Mocked exception")
+
+        URLParser.get_webpage_html = MagicMock(side_effect=mock_get)
+
+        result = await URLParser.get_webpage_html(url)
+        assert result is None, "При возникновении исключения функция должна вернуть None"
