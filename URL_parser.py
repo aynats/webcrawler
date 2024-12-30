@@ -17,10 +17,10 @@ class URLParser:
                 try:
                     async with session.get(url) as response:
                         return await response.text()
-                except Exception:
-                    return
-        except ConnectionRefusedError:
-            pass
+                except aiohttp.ClientError:
+                    pass
+        except Exception:
+            return None
 
     @staticmethod
     def take_linked_urls(url: str, html: str):
