@@ -19,7 +19,8 @@ class Saver:
         """
         Сохраняет в директорию страницу
         :param: url: Ссылка на сохраняемую веб-страницу
-        :param: page_path: Путь до директории, куда нужно сохранить веб-страницу
+        :param: path: Имя для директории, куда будут сохраняться данные
+        :param: directory: Путь до директории, куда нужно сохранить веб-страницу
         """
         session = requests.Session()
         try:
@@ -33,11 +34,11 @@ class Saver:
             'link': 'href',
             'script': 'src'
         }
-        for tag, attribute in tags_inner.items():   # Поочередно сохраняем медиафайлы нужных типов
+        for tag, attribute in tags_inner.items():
             Saver.save_media(soup, directory, session, url, tag, attribute)
-            break
-        os.chdir(directory)
-        with open(path + '.html', 'wb') as file:
+
+        os.chdir(directory)     # Переход в дочернюю директорию для сохранения данных
+        with open(path + '.html', 'wb') as file:    # Запись HTML страницы в файл
             file.write(soup.prettify('utf-8'))
         os.chdir('../')
 
@@ -49,6 +50,7 @@ class Saver:
         :param: soup: BeautifulSoup
         :param: directory: Директория сохранения медиафайлов
         :param: session: Текущая сессия
+        :param: url: Ссылка на страницу
         :param: tag: img/link/src
         :param: attribute: Аттрибуты в HTML, соответствующие тэгам tag
         """
@@ -57,11 +59,11 @@ class Saver:
                 # Разделили название файла и расширение
                 filename, extension = os.path.splitext(os.path.basename(resource[attribute]))
                 filename = re.sub(r'\W+', '', filename) + extension    # Взяли только буквенные символы в названии
-                file_url = urljoin(url, resource.get(attribute))    # Оффлайн-доступ к медиафайлам. Заменяем ссылки
-                filepath = os.path.join(directory, filename)
-                resource[attribute] = os.path.join(os.path.basename(directory), filename)
+                file_url = urljoin(url, resource.get(attribute))    # Замена относительной ссылки на абсолютную
+                filepath = os.path.join(directory, filename)    # Формируем путь до медиафайла в директории: ./data + / + image.jpg
+                resource[attribute] = os.path.join(os.path.basename(directory), filename)    # Заменяем путь на локальный для доступа оффлайн
 
-                try:
+                try:     # Загружаем файл. Если уже загрузили ранее, то не загружаем.
                     if not os.path.isfile(filepath):
                         with open(filepath, 'wb') as file:
                             file_bin = session.get(file_url)
