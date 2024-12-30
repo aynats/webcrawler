@@ -12,12 +12,12 @@ logging.basicConfig(
 
 
 @dataclass
-class FetchTask:
+class BotProcess:
     tid: int
     maximum_depth: int
     path: str
 
-    async def perform(self, crawler, worker_id: int):
+    async def process(self, crawler, worker_id: int):
         """
         Обходит адреса в пределах глубины сканирования
         param: crawler: Crawler

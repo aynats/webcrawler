@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from task import FetchTask
+from bot_process import BotProcess
 from typing import Optional
 from URL_parser import URLParser
 from domains_parser import DomainParser
@@ -35,7 +35,7 @@ class Crawler:
     async def _worker(self, task, tid):
         async with asyncio.Semaphore(self.max_rate):
             self.concurrent_workers += 1
-            await task.perform(self, tid)
+            await task.process(self, tid)
             self.tasks_queue.task_done()
         self.concurrent_workers -= 1
         if not self.is_crawled and self.concurrent_workers == 0:
@@ -71,9 +71,9 @@ class Crawler:
 
     async def run(self):
         for i in range(1, self.bots):
-            await self.tasks_queue.put(FetchTask(tid=i,
-                                                 maximum_depth=self.depth,
-                                                 path=self.directory))
+            await self.tasks_queue.put(BotProcess(tid=i,
+                                                  maximum_depth=self.depth,
+                                                  path=self.directory))
         self.is_crawled = True
         self._scheduler_task = asyncio.create_task(self._scheduler())
         await self.tasks_queue.join()
