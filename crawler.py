@@ -11,6 +11,7 @@ logging.basicConfig(
     level=logging.INFO
 )
 
+
 class Crawler:
     def __init__(self, file, depth: int = 2, directory: str = '', bots: int = 4, domain: str = ''):
         if file.endswith('.txt') or file.startswith("http"):
