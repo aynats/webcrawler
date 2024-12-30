@@ -74,40 +74,49 @@ class TestSaver(unittest.TestCase):
         '''
         soup = BeautifulSoup(html_content, 'html.parser')
         directory = 'test_data'
-
-        # Вызов метода
         Saver.save_media(soup, directory, mock_session, 'https://example.com', 'img', 'src')
-
-        # Проверяем, что файл был открыт для записи
         mock_open_func.assert_called_with(os.path.join(directory, 'image1.jpg'), 'wb')
-
-        # Проверяем, что был выполнен запрос на загрузку изображения
         mock_session.get.assert_called_with('https://example.com/image1.jpg')
 
     @patch('saver.requests.Session')
     @patch('os.path.isfile')
+    @patch('os.path.getsize')
     @patch('builtins.open', new_callable=mock_open)
-    def test_save_media_existing_file(self, mock_open_func, mock_isfile, mock_requests):
-        # Настройка
+    def test_save_media_existing_file_with_partial_download(self, mock_open_func, mock_getsize, mock_isfile,
+                                                            mock_requests):
+        # Сценарий 1: Файл существует
         mock_isfile.return_value = True  # Файл существует
+        mock_getsize.return_value = 1000  # Размер существующего файла
         mock_session = MagicMock()
         mock_requests.return_value = mock_session
 
         html_content = '''
-            <html>
-                <body>
-                    <img src="https://example.com/image1.jpg">
-                </body>
-            </html>
+                <html>
+                    <body>
+                        <img src="https://example.com/image1.jpg">
+                    </body>
+                </html>
             '''
         soup = BeautifulSoup(html_content, 'html.parser')
         directory = 'test_data'
-
-        # Вызов метода
+        # Первый тест: файл уже существует и не требует дозагрузки
         Saver.save_media(soup, directory, mock_session, 'https://example.com', 'img', 'src')
-
-        # Проверяем, что файл не был открыт для записи, так как он уже существует
+        mock_session.get.assert_called_once_with("https://example.com/image1.jpg", headers={'Range': 'bytes=1000-'}, stream=True)
         mock_open_func.assert_not_called()
 
-        # Проверяем, что запрос на загрузку изображения не был выполнен
-        mock_session.get.assert_not_called()
+        # Второй тест: файл существует и требует дозагрузки
+        mock_isfile.return_value = True  # Файл существует
+        mock_getsize.return_value = 1000  # Размер существующего файла
+
+        # Мокируем HTTP-ответ для дозагрузки
+        mock_response = MagicMock()
+        mock_response.status_code = 206  # Partial Content
+        mock_response.iter_content.return_value = [b"part of content", b"additional part"]
+        mock_session.get.return_value = mock_response
+        Saver.save_media(soup, directory, mock_session, "https://example.com", 'img', 'src')
+
+        mock_session.get.assert_any_call("https://example.com/image1.jpg", headers={'Range': 'bytes=1000-'}, stream=True)
+        mock_open_func.assert_called_once_with(os.path.join(directory, "image1.jpg"), "ab")
+
+        mock_open_func.return_value.write.assert_any_call(b"part of content")
+        mock_open_func.return_value.write.assert_any_call(b"additional part")

@@ -63,10 +63,22 @@ class Saver:
                 filepath = os.path.join(directory, filename)    # Формируем путь до медиафайла в директории: ./data + / + image.jpg
                 resource[attribute] = os.path.join(os.path.basename(directory), filename)    # Заменяем путь на локальный для доступа оффлайн
 
-                try:     # Загружаем файл. Если уже загрузили ранее, то не загружаем.
+                try:     # Загружаем файл. Если уже загрузили ранее, то обрабатываем.
                     if not os.path.isfile(filepath):
                         with open(filepath, 'wb') as file:
                             file_bin = session.get(file_url)
                             file.write(file_bin.content)
+                    else:
+                        # Если файл уже есть, проверяем его размер
+                        existing_file_size = os.path.getsize(filepath)
+                        headers = {'Range': f'bytes={existing_file_size}-'}
+                        response = session.get(file_url, headers=headers, stream=True)
+
+                        if response.status_code == 206:  # Partial Content
+                            with open(filepath, 'ab') as file:  # Открываем файл для дозаписи
+                                for chunk in response.iter_content(chunk_size=8192):
+                                    file.write(chunk)
+                        elif response.status_code == 200:
+                            continue
                 except Exception:
                     pass
