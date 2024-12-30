@@ -35,6 +35,7 @@ class BotProcess:
                 last_folder = ''
             else:
                 last_folder = last_folder.group(0)
+
             if last_folder in hot_keys["Disallow"] or "/" in hot_keys["Disallow"]:
                 return
 
