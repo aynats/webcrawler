@@ -29,7 +29,7 @@ class BotProcess:
             parser = RobotParser(url)
             parser.parse()
             hot_keys = parser.key_words
-            last_folder = re.search(r"/(\S[^/])+$", str(url))
+            last_folder = re.search(r"/([^/]+)/?$", str(url))
 
             if not last_folder:
                 last_folder = ''
