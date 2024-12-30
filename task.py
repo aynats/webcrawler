@@ -13,8 +13,8 @@ logging.basicConfig(
 
 @dataclass
 class FetchTask:
-    maximum_depth: int
     tid: int
+    maximum_depth: int
     path: str
 
     async def perform(self, crawler, worker_id: int):
