@@ -15,15 +15,14 @@
 
 Список дополнительных флагов: 
 ```Options:
-  -s, --scan TEXT      URL сканируемого сайта или файл .txt с несколькими URL-
-                       амиПример: --scan https://example.com или --scan
-                       urls.txt  [required]
+  -s, --scan TEXT      URL сканируемого сайта или файл .txt с несколькими URL-ами
+                       Пример: --scan https://example.com или --scan urls.txt
   -d, --depth INTEGER  Глубина сканирования ресурса  [default: 3]
-  -p, --path TEXT      Директория для скачивания файловПример: --path
-                       C:/Users/User/directory
+  -p, --path TEXT      Директория для скачивания файлов
+                       Пример: --path C:/Users/User/directory
   -b, --bots INTEGER   Количество ботов для обхода  [default: 4]
-  -dm, --domain TEXT   Переход только по ссылкам указанного доменаПример:
-                       --domain example.org или --domain domains.txt
+  -dm, --domain TEXT   Переход только по ссылкам указанного домена
+                       Пример: --domain example.org или --domain domains.txt
   --help               Show this message and exit.
 ```
 
