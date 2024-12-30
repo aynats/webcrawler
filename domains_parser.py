@@ -4,7 +4,7 @@ from urllib.parse import urlparse
 
 class DomainParser:
     @staticmethod
-    def get_domains_from_txt(file: str):
+    def get_domains_from_txt(file: str) -> list[str]:
         """
         Получает список доменов из файла .txt
         :param file: Файл .txt со списком разрешенных доменов
